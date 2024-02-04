@@ -1,0 +1,15 @@
+-- Crie o banco de dados
+CREATE DATABASE IF NOT EXISTS youweb_db;
+USE youweb_db;
+
+-- Crie uma tabela para vídeos
+CREATE TABLE IF NOT EXISTS videos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    url VARCHAR(255) NOT NULL,
+    channel_name VARCHAR(255) NOT NULL,
+    subscribers INT NOT NULL,
+    views INT NOT NULL,
+    publish_date DATE NOT NULL,
+    comments INT NOT NULL
+);
