@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uploads - YOU WEB</title>
+    <script defer src="create_uploaded_files_table.sql"></script>
+<script defer src="ExpressMulterMySQLUploader.js"></script>
+    <style>
+        /* Estilos CSS */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #ff0000;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        nav {
+            background-color: #333;
+            color: white;
+            text-align: center;
+        }
+
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        nav ul li {
+            display: inline;
+            margin-right: 20px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+
+        #upload-container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0px 0px 5px 0px #ccc;
+        }
+
+        #upload-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #upload-form label {
+            margin-bottom: 10px;
+        }
+
+        #upload-form input {
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+
+        #upload-form textarea {
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+
+        #upload-form button {
+            background-color: #ff0000;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #uploaded-files {
+            margin-top: 20px;
+        }
+
+        #uploaded-files img {
+            max-width: 100%;
+            margin-bottom: 10px;
+        }
+
+        /* Responsividade */
+        @media screen and (max-width: 576px) {
+            #upload-form input, #upload-form textarea {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>YOU WEB</h1>
+        <p>O seu site de vídeos favorito</p>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="index.html">Início</a></li>
+            <li><a href="trends.html">Tendências</a></li>
+            <li><a href="subscriptions.html">Inscrições</a></li>
+            <li><a href="settings.html">Configurações</a></li>
+            <li><a href="uploads.html">Uploads</a></li>
+            <li><a href="history.html">Histórico</a></li>
+            <li><a href="playlists.html">Playlists</a></li>
+            <li><a href="channel.html">Canal</a></li>
+            <li><a href="notifications.html">Notificações</a></li>
+            <li><a class="vip" href="vip.html">VIP</a></li>
+            <li><a href="library.html">Biblioteca</a></li>
+        </ul>
+    </nav>
+    <div id="upload-container">
+        <h2>Envie seus arquivos</h2>
+        <div id="upload-form">
+            <label for="file">Escolha um arquivo:</label>
+            <input type="file" id="file" name="file" accept="video/*, image/*">
+            <label for="title">Nome do arquivo:</label>
+            <input type="text" id="title" name="title">
+            <label for="description">Descrição do arquivo:</label>
+            <textarea id="description" name="description"></textarea>
+            <button id="upload-button">Enviar</button>
+        </div>
+        <div id="uploaded-files">
+            <!-- Arquivos enviados serão exibidos aqui -->
+        </div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('upload-button').addEventListener('click', function () {
+            // Get input values
+            var fileInput = document.getElementById('file');
+            var titleInput = document.getElementById('title');
+            var descriptionInput = document.getElementById('description');
+
+            // Generate a unique ID (you can use a more robust method if needed)
+            var uniqueId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+            // Create a new file object with the unique ID
+            var file = {
+                id: uniqueId,
+                name: titleInput.value,
+                description: descriptionInput.value,
+                // Add more properties if needed
+            };
+
+            // Append the uploaded file to the uploaded-files section
+            appendFileToUI(file);
+
+            // Clear input fields
+            fileInput.value = '';
+            titleInput.value = '';
+            descriptionInput.value = '';
+        });
+
+        function appendFileToUI(file) {
+            var uploadedFilesContainer = document.getElementById('uploaded-files');
+
+            // Create a new div element
+            var fileDiv = document.createElement('div');
+            fileDiv.innerHTML = '<p>ID: ' + file.id + '</p>' +
+                                '<p>Name: ' + file.name + '</p>' +
+                                '<p>Description: ' + file.description + '</p>' +
+                                // Add more properties if needed
+                                '<hr>';
+
+            // Append the new div to the uploaded files container
+            uploadedFilesContainer.appendChild(fileDiv);
+        }
+    });
+</script>
+ 
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const uploadButton = document.getElementById('upload-button');
+    const fileInput = document.getElementById('file');
+    const titleInput = document.getElementById('title');
+    const descriptionInput = document.getElementById('description');
+    const uploadedFilesContainer = document.getElementById('uploaded-files');
+
+    uploadButton.addEventListener('click', function () {
+      const file = fileInput.files[0];
+      const title = titleInput.value;
+      const description = descriptionInput.value;
+
+      if (file && title && description) {
+        const fileId = generateUniqueId(); // Função para gerar ID único
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('title', title);
+        formData.append('description', description);
+
+        axios.post('sua_url_de_upload', formData, {
+          onUploadProgress: function (progressEvent) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            console.log(percentCompleted + '%'); // Aqui você pode exibir a porcentagem ou atualizar a barra de progresso
+          },
+        })
+        .then(function (response) {
+          // Lógica para exibir o arquivo enviado, você pode usar response.data para obter informações do servidor
+          const fileLink = 'sua_url_do_arquivo/' + fileId;
+          const imgElement = document.createElement('img');
+          imgElement.src = fileLink;
+          uploadedFilesContainer.appendChild(imgElement);
+        })
+        .catch(function (error) {
+          console.error('Erro ao enviar arquivo', error);
+        });
+      } else {
+        alert('Por favor, preencha todos os campos.');
+      }
+    });
+
+    function generateUniqueId() {
+      return 'file_' + Date.now(); // Implementação simples para gerar ID único
+    }
+  });
+</script>
+
+
+</body>
+</html>
