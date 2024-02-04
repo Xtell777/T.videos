@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Uploads - YOU WEB</title>
-    <script defer src="ExpressMulterMySQLUploader.js"></script>
-    <script defer src="create_uploaded_files_table.sql"></script>    <style>
+    <style>
         /* Adicione o seu estilo CSS aqui */
         header {
             background-color: #333;
@@ -114,98 +113,6 @@
         .cancel-button:hover {
             background-color: darkred;
         }
- /* Estilos CSS */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            background-color: #ff0000;
-            color: white;
-            padding: 10px;
-            text-align: center;
-        }
-
-        nav {
-            background-color: #333;
-            color: white;
-            text-align: center;
-        }
-
-        nav ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        nav ul li {
-            display: inline;
-            margin-right: 20px;
-        }
-
-        nav ul li a {
-            text-decoration: none;
-            color: white;
-            font-weight: bold;
-        }
-
-        #upload-container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            box-shadow: 0px 0px 5px 0px #ccc;
-        }
-
-        #upload-form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #upload-form label {
-            margin-bottom: 10px;
-        }
-
-        #upload-form input {
-            margin-bottom: 10px;
-            padding: 10px;
-        }
-
-        #upload-form textarea {
-            margin-bottom: 20px;
-            padding: 10px;
-        }
-
-        #upload-form button {
-            background-color: #ff0000;
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        #uploaded-files {
-            margin-top: 20px;
-        }
-
-        #uploaded-files img {
-            max-width: 100%;
-            margin-bottom: 10px;
-        }
-
-        /* Responsividade */
-        @media screen and (max-width: 576px) {
-            #upload-form input, #upload-form textarea {
-                width: 100%;
-            }
-        }
     </style>
 </head>
 <body>
@@ -246,6 +153,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Declarar as variáveis dos elementos do formulário
         const uploadButton = document.getElementById('upload-button');
         const fileInput = document.getElementById('file');
         const titleInput = document.getElementById('title');
@@ -314,30 +222,21 @@
             uploadedFilesContainer.appendChild(progressBar);
             uploadedFilesContainer.appendChild(cancelButton);
 
-            // Criar um novo objeto XMLHttpRequest
-            const xhr = new XMLHttpRequest();
+            // Usar a biblioteca axios para fazer a requisição POST para o servidor
+            axios.post('/action_page.php', formData, {
+                // Adicionar um listener para o evento de progresso
+                onUploadProgress: function (event) {
+                    // Calcular a porcentagem do upload
+                    const percent = Math.round((event.loaded / event.total) * 100);
 
-            // Abrir uma requisição POST para a página de ação do servidor
-            xhr.open('POST', '/action_page.php');
-
-            // Adicionar um listener para o evento de progresso
-            xhr.addEventListener('progress', function (event) {
-                // Calcular a porcentagem do upload
-                const percent = Math.round((event.loaded / event.total) * 100);
-
-                // Atualizar a largura e o texto da barra de progresso
-                progressBar.style.width = percent + '%';
-                progressBar.textContent = percent + '%';
-            });
-
-            // Adicionar um listener para o evento de carregamento
-            xhr.addEventListener('load', function () {
+                    // Atualizar a largura e o texto da barra de progresso
+                    progressBar.style.width = percent + '%';
+                    progressBar.textContent = percent + '%';
+                }
+            }).then(function (response) {
                 // Upload concluído, exibir uma mensagem de sucesso
                 progressBar.textContent = 'Upload concluído!';
-            });
-
-            // Adicionar um listener para o evento de erro
-            xhr.addEventListener('error', function () {
+            }).catch(function (error) {
                 // Upload falhou, exibir uma mensagem de erro
                 progressBar.style.backgroundColor = 'red';
                 progressBar.textContent = 'Erro no upload!';
@@ -345,16 +244,13 @@
 
             // Adicionar um listener para o botão de cancelar
             cancelButton.addEventListener('click', function () {
-                // Abortar a requisição de upload
-                xhr.abort();
+                // Cancelar a requisição de upload
+                axios.CancelToken.source().cancel();
 
                 // Remover a barra de progresso e o botão de cancelar da seção de arquivos enviados
                 uploadedFilesContainer.removeChild(progressBar);
                 uploadedFilesContainer.removeChild(cancelButton);
             });
-
-            // Enviar o form data para o servidor
-            xhr.send(formData);
         }
     });
 </script>
